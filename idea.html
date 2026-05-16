@@ -265,12 +265,15 @@
       background: #fafafa;
       border: 1.5px solid #eee;
       border-radius: 12px;
-      padding: 16px;
+      padding: 12px 10px 12px 12px;
       display: flex;
-      justify-content: space-between;
       align-items: flex-start;
-      gap: 12px;
+      gap: 10px;
       transition: border-color 0.15s, opacity 0.3s;
+      /* iPhoneでコンテンツが溢れて押し出されないよう幅を確定 */
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
     }
 
     .idea-item:hover {
@@ -292,50 +295,71 @@
       opacity: 0.6;
     }
 
-    .idea-item.done .idea-date-done {
-      display: inline;
-    }
-
-    /* Checkbox */
-    .idea-checkbox {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 2px solid #ccc;
-      background: white;
-      cursor: pointer;
+    /* チェックボックス — 44×44pxのタップ領域（iOS推奨最小サイズ） */
+    .checkbox-wrap {
+      position: relative;
       flex-shrink: 0;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-top: 2px;
+      margin-top: -4px;
+      margin-left: -4px;
+    }
+
+    .checkbox-circle {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid #ccc;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: all 0.2s ease;
-      font-size: 0.75rem;
+      box-sizing: border-box;
+      font-size: 14px;
+      font-weight: 700;
+      color: white;
+      pointer-events: none;
     }
 
-    .idea-checkbox:hover {
-      border-color: #6c63ff;
-      background: #f0eeff;
-    }
-
-    .idea-checkbox.checked {
+    .checkbox-circle.checked {
       background: #6c63ff;
       border-color: #6c63ff;
-      color: white;
+    }
+
+    .idea-checkbox {
+      position: absolute;
+      inset: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      border-radius: 50%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* 中央コンテンツ — min-width:0 でflexの溢れを防ぐ */
+    .idea-content {
+      flex: 1;
+      min-width: 0;
     }
 
     .idea-meta {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 5px;
     }
 
     .idea-tag {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       font-weight: 600;
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 999px;
+      white-space: nowrap;
     }
 
     .tag-work    { background: #dbeafe; color: #1d4ed8; }
@@ -344,40 +368,50 @@
     .tag-other   { background: #f3e8ff; color: #7e22ce; }
 
     .idea-date {
-      font-size: 0.75rem;
+      font-size: 0.72rem;
       color: #aaa;
+      white-space: nowrap;
     }
 
     .idea-date-done {
       display: none;
-      font-size: 0.7rem;
+      font-size: 0.68rem;
       color: #bbb;
-      margin-left: 4px;
+      width: 100%;
+    }
+
+    .idea-item.done .idea-date-done {
+      display: block;
     }
 
     .idea-text {
-      font-size: 0.95rem;
+      font-size: 0.93rem;
       line-height: 1.6;
       color: #333;
-      flex: 1;
+      word-break: break-word;
+      overflow-wrap: anywhere;
       transition: color 0.3s, text-decoration 0.3s;
     }
 
     .idea-actions {
-      display: flex;
-      gap: 6px;
       flex-shrink: 0;
+      display: flex;
+      align-items: flex-start;
     }
 
     .icon-btn {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 4px 6px;
-      border-radius: 6px;
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
       font-size: 1rem;
-      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       transition: background 0.1s;
+      -webkit-tap-highlight-color: transparent;
     }
 
     .icon-btn:hover {
@@ -618,12 +652,13 @@
         : '';
       return `
         <div class="idea-item${done ? ' done' : ''}" id="item-${idea.id}">
-          <button class="idea-checkbox${done ? ' checked' : ''}"
-                  onclick="toggleCheck(${idea.id})"
-                  title="${done ? 'チェックを外す' : '完了にする'}">
-            ${done ? '✓' : ''}
-          </button>
-          <div style="flex:1;">
+          <div class="checkbox-wrap">
+            <div class="checkbox-circle${done ? ' checked' : ''}">${done ? '✓' : ''}</div>
+            <button class="idea-checkbox"
+                    onclick="toggleCheck(${idea.id})"
+                    title="${done ? 'チェックを外す' : '完了にする'}"></button>
+          </div>
+          <div class="idea-content">
             <div class="idea-meta">
               <span class="idea-tag ${t.cls}">${t.emoji} ${t.label}</span>
               <span class="idea-date">${idea.date}</span>
